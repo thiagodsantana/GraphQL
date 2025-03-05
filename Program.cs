@@ -7,10 +7,12 @@ builder.AddServiceDefaults();
 builder.Services.AddServiceDiscovery();
 builder.Services.AddProblemDetails();
 
-builder.Services.AddGraphQLServer().AddQueryType<Query>()
-                                   .AddProjections()
-                                   .AddFiltering()
-                                   .AddSorting();
+builder.Services.AddGraphQLServer()
+                .AddQueryType<Query>()
+                .AddMutationType<Mutation>()
+                .AddProjections()
+                .AddFiltering()
+                .AddSorting();
 
 var app = builder.Build();
 
