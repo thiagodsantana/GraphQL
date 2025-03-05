@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="6.1.0" />
+    <PackageReference Include="GraphQL.SystemTextJson" Version="8.4.1" />
+    <PackageReference Include="HotChocolate" Version="15.1.0-p.10.1" />
+    <PackageReference Include="HotChocolate.AspNetCore" Version="15.1.0-p.10.1" />
+    <PackageReference Include="HotChocolate.Data" Version="15.1.0-p.10.1" />
+    <PackageReference Include="HotChocolate.Data.EntityFramework" Version="15.1.0-p.10.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ConsignadoGraphQL.ServiceDefaults\ConsignadoGraphQL.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>
