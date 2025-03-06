@@ -1,4 +1,5 @@
 ﻿using ConsignadoGraphQL.Models;
+using ConsignadoGraphQL.Repository;
 
 namespace ConsignadoGraphQL.GraphQL
 {
@@ -8,6 +9,6 @@ namespace ConsignadoGraphQL.GraphQL
         [UseFiltering]
         [UseSorting]
         [GraphQLDescription("Lista de beneficiários com seus respectivos benefícios e contratos.")]
-        public IQueryable<Beneficiario> GetBeneficiarios() => Repository.GetBeneficiarios();
+        public IQueryable<Beneficiario> GetBeneficiarios() => BeneficiarioRepository.GetBeneficiarios();
     }
 }

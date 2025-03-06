@@ -1,4 +1,5 @@
 ﻿using ConsignadoGraphQL.Models;
+using ConsignadoGraphQL.Repository;
 
 namespace ConsignadoGraphQL.GraphQL
 {
@@ -24,7 +25,7 @@ namespace ConsignadoGraphQL.GraphQL
                 }).ToList()
             };
 
-            Repository.AddBeneficiario(beneficiario);
+            BeneficiarioRepository.AddBeneficiario(beneficiario);
             return beneficiario;
         }
     }
