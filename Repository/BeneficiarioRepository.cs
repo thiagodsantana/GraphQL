@@ -3,41 +3,41 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ConsignadoGraphQL.Repository
 {
-    public class BeneficiarioRepository
+    public class BeneficiarioRepository(ConsignadoContext context)
     {
-        private readonly ConsignadoContext _context;
-
-        public BeneficiarioRepository(ConsignadoContext context)
+        public IQueryable<Beneficiario> GetBeneficiarios()
         {
-            _context = context;
+            return context.Beneficiarios
+                           .Include(b => b.Beneficios)
+                           .ThenInclude(ben => ben.Contratos)
+                            .AsQueryable();
+
         }
 
-        public IQueryable<Beneficiario> GetBeneficiarios()
-            => _context.Beneficiarios
-                        .Include(b => b.Beneficios)
-                            .ThenInclude(ben => ben.Contratos)
-                        .AsQueryable();
+        public Beneficiario? GetBeneficiarioById(int id)
+        {
+            return context.Beneficiarios
+                .Include(b => b.Beneficios)
+                .FirstOrDefault(b => b.Id == id);
+        }
 
-        
-        #region Métodos de Inserção
         public Beneficiario AddBeneficiario(Beneficiario novoBeneficiario)
         {
-            _context.Beneficiarios.Add(novoBeneficiario);
+            context.Beneficiarios.Add(novoBeneficiario);
 
             // Atribui IDs e relacionamentos antes de salvar no banco
             foreach (var beneficio in novoBeneficiario.Beneficios)
             {
-                _context.Beneficios.Add(beneficio);
+                context.Beneficios.Add(beneficio);
 
                 foreach (var contrato in beneficio.Contratos)
                 {
-                    _context.Contratos.Add(contrato);
+                    context.Contratos.Add(contrato);
                 }
             }
 
-            _context.SaveChanges();
+            context.SaveChanges();
             return novoBeneficiario;
         }
-        #endregion
     }
 }

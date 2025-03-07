@@ -81,6 +81,44 @@ query{
 
 ---
 
+## 📝 Exemplo de Consulta por ID Beneficiário
+
+```query {
+  beneficiarioById(id: 1) {
+    id
+    nome
+    cpf
+    beneficios {
+      id
+      tipo
+      valor
+    }
+  }
+}
+
+
+```
+
+### 🔹 Resposta Esperada
+```{
+  "data": {
+    "beneficiarioById": {
+      "id": 1,
+      "nome": "João Silva",
+      "cpf": "12345678901",
+      "beneficios": [
+        {
+          "id": 1,
+          "tipo": "Aposentadoria",
+          "valor": 1200
+        }
+      ]
+    }
+  }
+}
+```
+---
+
 ## 📝 Exemplo de Mutation (Adicionar Beneficiário)
 
 ```graphql
@@ -143,6 +181,7 @@ mutation {
   }
 }
 ```
+
 
 ## 📝 Exemplo de Consumo Subscription
 
