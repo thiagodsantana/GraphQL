@@ -1,11 +1,18 @@
 ﻿using ConsignadoGraphQL.Models;
 using ConsignadoGraphQL.Repository;
+using HotChocolate.Subscriptions;
 
 namespace ConsignadoGraphQL.GraphQL
 {
     public class Mutation
     {
-        public Beneficiario AddBeneficiario(
+        private readonly ITopicEventSender _eventSender;
+        public Mutation(ITopicEventSender eventSender)
+        {
+                _eventSender = eventSender;
+        }
+
+        public async Task<Beneficiario> AddBeneficiarioAsync(
             BeneficiarioInput input)
         {
             var beneficiario = new Beneficiario
@@ -26,6 +33,7 @@ namespace ConsignadoGraphQL.GraphQL
             };
 
             BeneficiarioRepository.AddBeneficiario(beneficiario);
+            await _eventSender.SendAsync(nameof(Subscription.OnBeneficiarioAdded), beneficiario);
             return beneficiario;
         }
     }

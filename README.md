@@ -144,3 +144,27 @@ mutation {
 }
 ```
 
+## 📝 Exemplo de Consumo Subscription
+
+```subscription {
+  onBeneficiarioAdded {
+    id
+    nome
+    cpf
+  }
+}
+
+```
+
+### 🔹 Resposta Esperada
+```{
+  "data": {
+    "onBeneficiarioAdded": {
+      "id": 4,
+      "nome": "Carlos Mendes",
+      "cpf": "12345678910"
+    }
+  }
+}
+```
+
