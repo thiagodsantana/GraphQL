@@ -1,4 +1,6 @@
-﻿namespace ConsignadoGraphQL.Models
+﻿using HotChocolate;
+
+namespace ConsignadoGraphQL.Models
 {
     public class Contrato
     {

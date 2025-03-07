@@ -1,6 +1,9 @@
 ﻿using AspNetCoreRateLimit;
+using ConsignadoGraphQL;
 using ConsignadoGraphQL.GraphQL;
+using ConsignadoGraphQL.Repository;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +11,13 @@ builder.AddServiceDefaults();
 builder.Services.AddServiceDiscovery();
 builder.Services.AddProblemDetails();
 
+// Adiciona a configuração do DbContext com SQL Server
+builder.Services.AddDbContext<ConsignadoContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("database")));
+
+
+
+builder.Services.AddScoped<BeneficiarioRepository>();
 builder.Services.AddScoped<Query>();
 builder.Services.AddScoped<Mutation>();
 builder.Services.AddScoped<Subscription>();
@@ -34,7 +44,6 @@ builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
 builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
 builder.Logging.AddConsole();
 
-
 // 📌 Adicionando GraphQL
 builder.Services
     .AddGraphQLServer()
@@ -47,6 +56,14 @@ builder.Services
     .AddSorting();
 
 var app = builder.Build();
+
+// Criação do banco de dados em tempo de execução
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ConsignadoContext>();
+    dbContext.Database.EnsureDeleted();
+    dbContext.Database.Migrate();  // Aplica as migrações pendentes e cria o banco se não existir
+}
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {

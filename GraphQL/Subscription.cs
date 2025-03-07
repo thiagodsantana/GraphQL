@@ -1,6 +1,4 @@
-﻿using HotChocolate;
-using ConsignadoGraphQL.Models;
-using System.Threading.Tasks;
+﻿using ConsignadoGraphQL.Models;
 
 namespace ConsignadoGraphQL.GraphQL
 {

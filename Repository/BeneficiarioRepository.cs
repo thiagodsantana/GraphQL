@@ -1,62 +1,41 @@
 ﻿using ConsignadoGraphQL.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ConsignadoGraphQL.Repository
 {
-    public static class BeneficiarioRepository
+    public class BeneficiarioRepository
     {
-        #region Gerando dados Fake
-        private static int _beneficiarioId = 1;
-        private static int _beneficioId = 1;
-        private static int _contratoId = 1;
+        private readonly ConsignadoContext _context;
 
-        public static List<Beneficiario> Beneficiarios { get; } = new()
-    {
-        new() { Id = _beneficiarioId++, Nome = "João Silva", CPF = "12345678901", Beneficios =
-            [
-                new() { Id = _beneficioId++, Tipo = "Aposentadoria", Valor = 3000m, BeneficiarioId = _beneficiarioId, Contratos =
-                    [
-                        new() { Id = _contratoId++, ValorTotal = 15000m, Parcelas = 24, TaxaJuros = 2.5m, BeneficioId = _beneficioId }
-                    ]
-                }
-            ]
-        },
-        new() { Id = _beneficiarioId++, Nome = "Maria Oliveira", CPF = "98765432100", Beneficios =
-            [
-                new() { Id = _beneficioId++, Tipo = "Pensão", Valor = 2500m, BeneficiarioId = _beneficiarioId, Contratos =
-                    [
-                        new() { Id = _contratoId++, ValorTotal = 12000m, Parcelas = 36, TaxaJuros = 3.0m, BeneficioId = _beneficioId }
-                    ]
-                }
-            ]
-        }
-    };
-        #endregion
-
-        #region Métodos de Consulta
-        public static IQueryable<Beneficiario> GetBeneficiarios() => Beneficiarios.AsQueryable();
-
-        public static Beneficiario? GetBeneficiarioById(int id)
-            => Beneficiarios.FirstOrDefault(b => b.Id == id);
-
-        public static Beneficiario? GetBeneficiarioByCPF(string cpf)
-            => Beneficiarios.FirstOrDefault(b => b.CPF == cpf);
-        #endregion
-
-        #region Métodos de Inserção
-        public static Beneficiario AddBeneficiario(Beneficiario novoBeneficiario)
+        public BeneficiarioRepository(ConsignadoContext context)
         {
-            novoBeneficiario.Id = _beneficiarioId++;
+            _context = context;
+        }
+
+        public IQueryable<Beneficiario> GetBeneficiarios()
+            => _context.Beneficiarios
+                        .Include(b => b.Beneficios)
+                            .ThenInclude(ben => ben.Contratos)
+                        .AsQueryable();
+
+        
+        #region Métodos de Inserção
+        public Beneficiario AddBeneficiario(Beneficiario novoBeneficiario)
+        {
+            _context.Beneficiarios.Add(novoBeneficiario);
+
+            // Atribui IDs e relacionamentos antes de salvar no banco
             foreach (var beneficio in novoBeneficiario.Beneficios)
             {
-                beneficio.Id = _beneficioId++;
-                beneficio.BeneficiarioId = novoBeneficiario.Id;
+                _context.Beneficios.Add(beneficio);
+
                 foreach (var contrato in beneficio.Contratos)
                 {
-                    contrato.Id = _contratoId++;
-                    contrato.BeneficioId = beneficio.Id;
+                    _context.Contratos.Add(contrato);
                 }
             }
-            Beneficiarios.Add(novoBeneficiario);
+
+            _context.SaveChanges();
             return novoBeneficiario;
         }
         #endregion

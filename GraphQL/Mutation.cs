@@ -4,14 +4,8 @@ using HotChocolate.Subscriptions;
 
 namespace ConsignadoGraphQL.GraphQL
 {
-    public class Mutation
+    public class Mutation(ITopicEventSender eventSender, BeneficiarioRepository beneficiarioRepository)
     {
-        private readonly ITopicEventSender _eventSender;
-        public Mutation(ITopicEventSender eventSender)
-        {
-                _eventSender = eventSender;
-        }
-
         public async Task<Beneficiario> AddBeneficiarioAsync(
             BeneficiarioInput input)
         {
@@ -32,8 +26,8 @@ namespace ConsignadoGraphQL.GraphQL
                 }).ToList()
             };
 
-            BeneficiarioRepository.AddBeneficiario(beneficiario);
-            await _eventSender.SendAsync(nameof(Subscription.OnBeneficiarioAdded), beneficiario);
+            beneficiarioRepository.AddBeneficiario(beneficiario);
+            await eventSender.SendAsync(nameof(Subscription.OnBeneficiarioAdded), beneficiario);
             return beneficiario;
         }
     }
