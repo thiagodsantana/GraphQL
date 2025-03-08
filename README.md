@@ -5,7 +5,7 @@ Este projeto implementa uma API GraphQL usando **HotChocolate** em .NET para ger
 ## 🚀 Tecnologias Utilizadas
 - **.NET 7/8**
 - **HotChocolate** (Biblioteca GraphQL para .NET)
-- **In-Memory Repository** (Simulação de banco de dados)
+- **Repository** (Banco de dados SQL Server usando migrations)
 - **Aspire** (Orquestração de aplicações distribuídas)
 
 ---
