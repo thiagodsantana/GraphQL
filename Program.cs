@@ -7,49 +7,52 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Adiciona configurações padrão do .NET Aspire
 builder.AddServiceDefaults();
 builder.Services.AddServiceDiscovery();
 builder.Services.AddProblemDetails();
 
-// Adiciona a configuração do DbContext com SQL Server
+// Configuração do DbContext para usar SQL Server
 builder.Services.AddDbContext<ConsignadoContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("database")));
 
-
-
+// Registra os repositórios e serviços GraphQL no container de injeção de dependências
 builder.Services.AddScoped<BeneficiarioRepository>();
 builder.Services.AddScoped<Query>();
 builder.Services.AddScoped<Mutation>();
 builder.Services.AddScoped<Subscription>();
 
-// 📌 Adicionando Rate Limiting
+// Configuração de Rate Limiting para limitar requisições ao endpoint GraphQL
 builder.Services.AddMemoryCache();
 builder.Services.AddInMemoryRateLimiting();
 builder.Services.Configure<IpRateLimitOptions>(options =>
 {
-    options.EnableEndpointRateLimiting = true;
+    options.EnableEndpointRateLimiting = true; // Habilita rate limiting por endpoint
     options.StackBlockedRequests = false;
     options.GeneralRules =
     [
         new() {
-            Endpoint = "POST:/graphql", // 🔥 Aplica o rate limit a requisição
-            Limit = 100,      // 🔥 Máximo de 1 requisição por minuto
+            Endpoint = "POST:/graphql", // Aplica rate limit a requisições POST no GraphQL
+            Limit = 100, // Máximo de 100 requisições por minuto
             Period = "1m"
         }
     ];
 });
 
+// Adiciona os serviços necessários para gerenciar Rate Limiting
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
 builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+
+// Adiciona logging para exibir logs no console
 builder.Logging.AddConsole();
 
-// 📌 Adicionando GraphQL
+// Configuração do GraphQL
 builder.Services
     .AddGraphQLServer()
-    .AddQueryType<Query>()
-    .AddMutationType<Mutation>()
-    .AddSubscriptionType<Subscription>()
+    .AddQueryType<Query>() // Registra a classe de Queries
+    .AddMutationType<Mutation>() // Registra a classe de Mutations
+    .AddSubscriptionType<Subscription>() // Registra a classe de Subscriptions
     .AddInMemorySubscriptions() // Habilita suporte a subscriptions em memória
     .AddProjections()
     .AddFiltering()
@@ -61,10 +64,11 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ConsignadoContext>();
-    dbContext.Database.EnsureDeleted();
-    dbContext.Database.Migrate();  // Aplica as migrações pendentes e cria o banco se não existir
+    dbContext.Database.EnsureDeleted(); // Remove o banco de dados se já existir (apenas para desenvolvimento)
+    dbContext.Database.Migrate(); // Aplica as migrações pendentes e cria o banco se não existir
 }
 
+// Configuração para suportar headers encaminhados (para proxies/reversos como Nginx)
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
@@ -72,12 +76,14 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 app.UseForwardedHeaders();
 
-// 📌 Aplicar middleware de Rate Limiting
+// Aplica o middleware de Rate Limiting
 app.UseIpRateLimiting();
 
-// 📌 Habilitar suporte a WebSockets (necessário para subscriptions)
+// Habilita suporte a WebSockets para permitir Subscriptions no GraphQL
 app.UseWebSockets();
 
+// Mapeia o endpoint do GraphQL
 app.MapGraphQL("/graphql");
 
+// Inicia o aplicativo
 app.Run();
